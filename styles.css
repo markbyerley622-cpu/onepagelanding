@@ -800,6 +800,9 @@ body.ready .foot       {transition-delay:.94s;}
 }
 .contact[hidden]{display:none;}
 
+/* the swipe affordance — only drawn on the stacked, touch layout */
+.contact-grip{display:none;}
+
 .contact-veil{
   position:absolute;
   inset:0;
@@ -821,6 +824,9 @@ body.ready .foot       {transition-delay:.94s;}
   transform:translate3d(0,12px,0);
   transition:opacity .5s var(--ease) .08s, transform .7s var(--ease) .08s;
 }
+/* while a finger is on it, the sheet tracks 1:1 with no easing in the way */
+.contact.dragging .contact-body,
+.contact.dragging .contact-veil{transition:none;}
 .contact.open .contact-body{opacity:1;transform:none;}
 
 .contact-close{
@@ -951,7 +957,8 @@ body.ready .foot       {transition-delay:.94s;}
   color:var(--muted);
 }
 
-body.locked{overflow:hidden;}
+html.locked,
+body.locked{overflow:hidden;overscroll-behavior:none;}
 
 @media (max-width:860px), (max-aspect-ratio:1/1){
   /* .panel is a transformed ancestor, so position:fixed would be trapped by
@@ -971,6 +978,20 @@ body.locked{overflow:hidden;}
   /* at phone size the rail sits directly behind the dialog and read through
      the 80% veil — on one screen it has to be opaque */
   .contact-veil{background:rgba(2,4,3,.955);}
+  .contact-grip{
+    display:block;
+    position:absolute;
+    z-index:2;
+    top:calc(var(--pad-y) + .55rem);
+    left:50%;
+    margin-left:-1.4rem;
+    width:2.8rem;
+    height:4px;
+    border-radius:999px;
+    background:rgba(255,255,255,.26);
+  }
+  /* the sheet scrolls itself when it must; the page behind stays put */
+  .contact-body{touch-action:pan-y;}
   .contact-body{
     width:100%;
     max-height:100%;

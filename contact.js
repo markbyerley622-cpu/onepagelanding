@@ -20,12 +20,32 @@
      (see styles.css) and the page behind it is held still */
   var stacked = window.matchMedia("(max-width:860px), (max-aspect-ratio:1/1)");
 
+  var veil = dialog.querySelector(".contact-veil");
+  var sheet = dialog.querySelector(".contact-body");
+  var savedY = 0;
+
+  function lock() {
+    savedY = window.pageYOffset || 0;
+    window.scrollTo(0, 0);
+    document.documentElement.classList.add("locked");
+    document.body.classList.add("locked");
+  }
+
+  function unlock() {
+    document.documentElement.classList.remove("locked");
+    document.body.classList.remove("locked");
+    window.scrollTo(0, savedY);
+  }
+
+  function clearDrag() {
+    dialog.classList.remove("dragging");
+    sheet.style.transform = "";
+    veil.style.opacity = "";
+  }
+
   function open() {
     lastFocus = document.activeElement;
-    if (stacked.matches) {
-      window.scrollTo(0, 0);
-      document.body.classList.add("locked");
-    }
+    if (stacked.matches) lock();
     dialog.hidden = false;
     /* one frame between unhide and the class, or the transition never runs */
     requestAnimationFrame(function () {
@@ -38,7 +58,8 @@
   }
 
   function close() {
-    document.body.classList.remove("locked");
+    clearDrag();
+    if (document.body.classList.contains("locked")) unlock();
     dialog.classList.remove("open");
     document.removeEventListener("keydown", onKey);
     window.setTimeout(function () {
@@ -69,6 +90,56 @@
       first.focus();
     }
   }
+
+  /* ---- swipe down to dismiss ---------------------------------------------
+     With the page held still behind it and its content fitting one screen,
+     a drag on the sheet had nothing to move and simply felt dead. It now
+     tracks the finger and lets go past a threshold. The gesture only arms
+     when the sheet is scrolled to its top, so a sheet that does overflow
+     still scrolls normally first. -------------------------------------- */
+
+  var DISMISS = 88;          /* px of travel that commits to closing */
+  var startY = 0, dy = 0, dragging = false;
+
+  dialog.addEventListener("touchstart", function (ev) {
+    if (!stacked.matches || ev.touches.length !== 1) return;
+    if (sheet.scrollTop > 0) return;
+    startY = ev.touches[0].clientY;
+    dy = 0;
+    dragging = true;
+    dialog.classList.add("dragging");
+  }, { passive: true });
+
+  dialog.addEventListener("touchmove", function (ev) {
+    if (!dragging) return;
+    dy = ev.touches[0].clientY - startY;
+    if (dy <= 0) {                     /* upward: hand it back to the sheet */
+      dy = 0;
+      sheet.style.transform = "";
+      veil.style.opacity = "";
+      return;
+    }
+    /* resistance past the threshold, so it never feels like a free fall */
+    var travel = dy > DISMISS ? DISMISS + (dy - DISMISS) * 0.45 : dy;
+    sheet.style.transform = "translate3d(0," + travel + "px,0)";
+    veil.style.opacity = String(Math.max(0.35, 1 - dy / 620));
+  }, { passive: true });
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    dialog.classList.remove("dragging");
+    if (dy > DISMISS) {
+      close();
+    } else {
+      sheet.style.transform = "";
+      veil.style.opacity = "";
+    }
+    dy = 0;
+  }
+
+  dialog.addEventListener("touchend", endDrag, { passive: true });
+  dialog.addEventListener("touchcancel", endDrag, { passive: true });
 
   opener.addEventListener("click", open);
   closer.addEventListener("click", close);
