@@ -1,0 +1,541 @@
+/* ==========================================================================
+   DRK — one-page liquid glass
+   Tokens carried over from the DRK design system (interactive-deck/globals.css)
+   ========================================================================== */
+
+:root{
+  --void:#000000;
+  --base:#050705;
+  --panel:#090b08;
+
+  --hairline:rgba(255,255,255,.07);
+
+  --ink:#f4f6f3;
+  --ink-soft:#dfe3dd;
+  --muted:#a5aca3;
+  --faint:#858c82;
+  --dim:#4a5048;
+
+  --signal:#00e060;
+  --signal-bright:#00fc6b;
+
+  --r-surface:22px;
+
+  --ease:cubic-bezier(.16,1,.3,1);
+
+  --pad-x:clamp(1.75rem, 4.2vw, 4.75rem);
+  --pad-y:clamp(1.5rem, 3vw, 2.75rem);
+
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+
+html,body{height:100%;}
+
+body{
+  margin:0;
+  background:var(--void);
+  color:var(--ink);
+  font-family:"Inter","Helvetica Neue",Arial,sans-serif;
+  font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  overflow:hidden;
+}
+
+a{color:inherit;text-decoration:none;}
+ul{margin:0;padding:0;list-style:none;}
+
+/* --------------------------------------------------------------------------
+   STAGE — one full-screen composition. The page never scrolls.
+   -------------------------------------------------------------------------- */
+
+.stage{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:clamp(.9rem, 3.2vh, 3.25rem) clamp(.9rem, 2.6vw, 3.25rem);
+  background:
+    radial-gradient(120% 90% at 72% 34%, #06110c 0%, #020402 46%, #000 78%),
+    var(--void);
+}
+
+/* faint atmosphere behind the panel — the room the glass floats in */
+.ambient{
+  position:absolute;
+  inset:-20%;
+  pointer-events:none;
+  background:
+    radial-gradient(46% 40% at 68% 40%, rgba(0,224,96,.055), transparent 68%),
+    radial-gradient(38% 34% at 30% 72%, rgba(0,90,120,.035), transparent 70%);
+  filter:blur(18px);
+  animation:drift 34s var(--ease) infinite alternate;
+}
+@keyframes drift{
+  0%  {transform:translate3d(0,0,0) scale(1);   opacity:.85;}
+  100%{transform:translate3d(-1.6%,1.1%,0) scale(1.06); opacity:1;}
+}
+
+/* --------------------------------------------------------------------------
+   PANEL — the floating sheet of smoked glass
+   -------------------------------------------------------------------------- */
+
+.panel{
+  position:relative;
+  width:min(1500px, 100%);
+  height:min(100%, 780px);
+  aspect-ratio:1500/700;
+  max-height:100%;
+  border-radius:var(--r-surface);
+  overflow:hidden;
+  isolation:isolate;
+  background:var(--base);
+  /* the bezel: an outer dark rim, a hair of light on top, deep drop below */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.055),
+    0 0 0 8px rgba(255,255,255,.018),
+    0 0 0 9px rgba(0,0,0,.9),
+    0 46px 120px -32px rgba(0,0,0,1),
+    0 0 140px -50px rgba(0,224,96,.24);
+  transform:translate3d(0,0,0);
+}
+
+#liquid{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  z-index:0;
+}
+
+/* very fine optical grain — kills gradient banding, adds photographic weight */
+.grain{
+  position:absolute;inset:-50%;
+  z-index:1;
+  pointer-events:none;
+  opacity:.15;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  animation:grainshift 7s steps(6) infinite;
+}
+@keyframes grainshift{
+  0%,100%{transform:translate(0,0)}
+  20%{transform:translate(-2%,1%)}
+  40%{transform:translate(1%,-2%)}
+  60%{transform:translate(-1%,-1%)}
+  80%{transform:translate(2%,1%)}
+}
+
+/* reading scrim — guarantees type contrast without flattening the glass */
+.scrim{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    linear-gradient(100deg, rgba(0,0,0,.90) 0%, rgba(0,0,0,.72) 22%, rgba(0,0,0,.26) 44%, rgba(0,0,0,0) 62%),
+    linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0) 34%),
+    linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,0) 26%),
+    linear-gradient(to left, rgba(0,0,0,.42), rgba(0,0,0,0) 24%);
+}
+
+/* the luminous glass rim */
+.edge{
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  border-radius:var(--r-surface);
+  padding:1px;
+  background:linear-gradient(150deg,
+    rgba(255,255,255,.34) 0%,
+    rgba(255,255,255,.05) 24%,
+    rgba(0,224,96,.20) 47%,
+    rgba(255,255,255,.04) 68%,
+    rgba(255,255,255,.22) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite:exclude;
+  opacity:.9;
+}
+
+/* --------------------------------------------------------------------------
+   LAYOUT INSIDE THE GLASS
+   -------------------------------------------------------------------------- */
+
+.inner{
+  position:relative;
+  z-index:4;
+  height:100%;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  padding:var(--pad-y) var(--pad-x);
+}
+
+.bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1.5rem;
+}
+
+.wordmark{
+  font-family:"Inter Tight",sans-serif;
+  font-weight:700;
+  font-size:clamp(1.35rem, 1.85vw, 1.9rem);
+  letter-spacing:.09em;
+  line-height:1;
+  color:#fff;
+  display:inline-flex;
+  align-items:flex-end;
+  gap:.24em;
+}
+
+.dot{
+  width:.19em;height:.19em;
+  border-radius:50%;
+  background:var(--signal);
+  display:inline-block;
+  margin-bottom:.1em;
+  box-shadow:0 0 10px rgba(0,224,96,.85), 0 0 26px rgba(0,224,96,.35);
+  animation:pulse 4.5s var(--ease) infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:.82; box-shadow:0 0 8px rgba(0,224,96,.6), 0 0 20px rgba(0,224,96,.22);}
+  50%    {opacity:1;   box-shadow:0 0 14px rgba(0,224,96,.95),0 0 38px rgba(0,224,96,.42);}
+}
+
+.meta{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:clamp(.575rem,.68vw,.7rem);
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--faint);
+  white-space:nowrap;
+}
+
+/* ---- content grid: strong left / right split ---- */
+
+.content{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:clamp(2rem,6vw,7rem);
+  padding:clamp(1rem,3.5vh,3rem) 0;
+}
+
+.lede-col{max-width:min(46ch, 100%);}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:.7em;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:clamp(.575rem,.66vw,.69rem);
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:clamp(1.1rem,2.4vh,1.9rem);
+}
+.tick{
+  width:18px;height:1px;
+  background:var(--signal);
+  display:block;
+  box-shadow:0 0 8px rgba(0,224,96,.9);
+  animation:tickglow 4.5s var(--ease) infinite;
+}
+@keyframes tickglow{
+  0%,100%{opacity:.55; width:14px;}
+  50%    {opacity:1;   width:22px;}
+}
+
+.headline{
+  margin:0;
+  font-family:"Inter Tight",sans-serif;
+  font-weight:600;
+  font-size:clamp(2.9rem, 5.6vw, 5.6rem);
+  line-height:.94;
+  letter-spacing:-.038em;
+  color:#fff;
+  display:flex;
+  align-items:flex-end;
+  gap:.06em;
+  text-shadow:0 2px 40px rgba(0,0,0,.9);
+}
+.dot-lg{
+  width:.115em;height:.115em;
+  margin-bottom:.13em;
+}
+
+.lede{
+  margin:clamp(1.1rem,2.4vh,1.7rem) 0 0;
+  font-size:clamp(.9375rem,1.05vw,1.0625rem);
+  line-height:1.62;
+  font-weight:300;
+  color:var(--ink-soft);
+  max-width:36ch;
+}
+
+.cta{
+  margin-top:clamp(1.6rem,3.4vh,2.6rem);
+  display:inline-flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:2.75rem;
+  min-width:min(15.5rem, 100%);
+  padding:.95rem 1.35rem .95rem 1.5rem;
+  border-radius:9px;
+  font-family:"Inter Tight",sans-serif;
+  font-weight:600;
+  font-size:.925rem;
+  letter-spacing:-.005em;
+  color:#fff;
+  background:linear-gradient(180deg, rgba(0,224,96,.09), rgba(0,224,96,.035));
+  border:1px solid rgba(0,224,96,.34);
+  backdrop-filter:blur(9px) saturate(1.15);
+  -webkit-backdrop-filter:blur(9px) saturate(1.15);
+  transition:
+    border-color .5s var(--ease),
+    box-shadow .5s var(--ease),
+    background .5s var(--ease),
+    transform .5s var(--ease);
+  animation:ctaglow 5.5s var(--ease) infinite;
+}
+@keyframes ctaglow{
+  0%,100%{box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 0 18px -8px rgba(0,224,96,.30), inset 0 1px 0 rgba(255,255,255,.07);}
+  50%    {box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 0 34px -6px rgba(0,224,96,.52), inset 0 1px 0 rgba(255,255,255,.10);}
+}
+.cta svg{
+  width:24px;height:12px;
+  fill:none;
+  stroke:var(--signal);
+  stroke-width:1.35;
+  stroke-linecap:square;
+  transition:transform .55s var(--ease), stroke .4s var(--ease);
+  filter:drop-shadow(0 0 6px rgba(0,224,96,.55));
+}
+.cta:hover{
+  border-color:rgba(0,224,96,.62);
+  background:linear-gradient(180deg, rgba(0,224,96,.16), rgba(0,224,96,.06));
+  transform:translateY(-1px);
+  animation:none;
+  box-shadow:0 0 0 1px rgba(0,0,0,.4), 0 0 42px -6px rgba(0,224,96,.6), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.cta:hover svg{transform:translateX(5px); stroke:var(--signal-bright);}
+.cta:focus-visible{outline:1px solid var(--signal); outline-offset:3px;}
+
+/* ---- right side: navigation / categories ---- */
+
+.nav-col{
+  position:relative;
+  justify-self:end;
+  text-align:right;
+}
+.nav-col::before{
+  content:"";
+  position:absolute;
+  inset:-22% -34% -22% -46%;
+  background:radial-gradient(62% 66% at 76% 50%, rgba(0,0,0,.80), rgba(0,0,0,.34) 52%, transparent 78%);
+  pointer-events:none;
+}
+
+.nav-col ul{
+  position:relative;
+  display:grid;
+  gap:clamp(.15rem,.9vh,.55rem);
+}
+
+.nav-col a{
+  position:relative;
+  display:grid;
+  grid-template-columns:auto auto;
+  align-items:baseline;
+  justify-content:end;
+  gap:1.15rem;
+  padding:clamp(.55rem,1.3vh,.85rem) 0 clamp(.55rem,1.3vh,.85rem) 1.5rem;
+  border-bottom:1px solid var(--hairline);
+  transition:border-color .5s var(--ease);
+}
+.nav-col li:last-child a{border-bottom:0;}
+
+.idx{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:.63rem;
+  letter-spacing:.16em;
+  color:var(--dim);
+  transition:color .45s var(--ease), text-shadow .45s var(--ease);
+}
+
+.lab{
+  text-shadow:0 1px 16px rgba(0,0,0,.95);
+  font-family:"Inter Tight",sans-serif;
+  font-weight:500;
+  font-size:clamp(.95rem,1.18vw,1.16rem);
+  letter-spacing:.015em;
+  color:var(--muted);
+  transition:color .45s var(--ease), transform .55s var(--ease);
+  transform-origin:right center;
+}
+
+/* the note is the reward for hovering — never present at rest */
+.note{
+  grid-column:1 / -1;
+  display:block;
+  max-height:0;
+  overflow:hidden;
+  opacity:0;
+  font-size:.72rem;
+  font-weight:300;
+  letter-spacing:.01em;
+  line-height:1.5;
+  color:var(--faint);
+  transition:max-height .55s var(--ease), opacity .45s var(--ease), margin .55s var(--ease);
+}
+
+.nav-col a:hover,
+.nav-col a:focus-visible{
+  border-color:rgba(0,224,96,.28);
+  outline:none;
+}
+.nav-col a:hover .lab,
+.nav-col a:focus-visible .lab{
+  color:#fff;
+  transform:translateX(-2px);
+}
+.nav-col a:hover .idx,
+.nav-col a:focus-visible .idx{
+  color:var(--signal);
+  text-shadow:0 0 12px rgba(0,224,96,.7);
+}
+.nav-col a:hover .note,
+.nav-col a:focus-visible .note{
+  max-height:4rem;
+  opacity:1;
+  margin-top:.4rem;
+}
+
+/* ---- footer strip ---- */
+
+.foot{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:clamp(.55rem,.64vw,.665rem);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+.foot .sig{color:var(--faint);}
+.rt{display:inline-flex;align-items:center;gap:.65em;}
+.live{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--signal);
+  box-shadow:0 0 9px rgba(0,224,96,.9);
+  animation:pulse 3.2s var(--ease) infinite;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE — the single-panel concept is preserved, never a stacked site
+   -------------------------------------------------------------------------- */
+
+@media (max-width:1080px){
+  .content{gap:clamp(1.5rem,4vw,3rem);}
+  .lede{max-width:30ch;}
+}
+
+@media (max-width:860px), (max-aspect-ratio:1/1){
+  .panel{
+    aspect-ratio:auto;
+    width:100%;
+    height:100%;
+    max-height:none;
+    border-radius:20px;
+  }
+  .content{
+    grid-template-columns:1fr;
+    align-content:center;
+    align-items:start;
+    gap:clamp(2rem,5vh,3.5rem);
+    padding:clamp(1.5rem,4vh,3rem) 0;
+  }
+  .lede-col{max-width:100%;}
+  .lede{max-width:34ch;}
+  .headline{font-size:clamp(2.6rem,13vw,4rem);}
+  .cta{width:100%;min-width:0;}
+  .nav-col{justify-self:stretch;text-align:left;}
+  .nav-col::before{display:none;}
+  .nav-col a{
+    grid-template-columns:auto 1fr;
+    justify-content:start;
+    gap:1rem;
+    padding-left:0;
+  }
+  .nav-col li:last-child a{border-bottom:1px solid var(--hairline);}
+  .note{display:none;}
+  .scrim{
+    background:
+      linear-gradient(to top, rgba(0,0,0,.92) 6%, rgba(0,0,0,.66) 40%, rgba(0,0,0,.16) 76%, rgba(0,0,0,0) 100%),
+      linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,0) 22%);
+  }
+  .meta{display:none;}
+}
+
+@media (max-height:520px) and (min-width:861px){
+  .note{display:none;}
+  .content{padding:.75rem 0;}
+}
+
+/* --------------------------------------------------------------------------
+   REDUCED MOTION
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ENTRANCE — the glass settles into the room once, then never again
+   -------------------------------------------------------------------------- */
+
+.panel{
+  opacity:0;
+  transform:translate3d(0,10px,0) scale(.988);
+  transition:opacity 1.15s var(--ease), transform 1.5s var(--ease);
+}
+body.ready .panel{
+  opacity:1;
+  transform:translate3d(0,0,0) scale(1);
+}
+
+.inner > *,
+.lede-col > *,
+.nav-col li{
+  opacity:0;
+  transform:translate3d(0,8px,0);
+  transition:opacity .9s var(--ease), transform 1.1s var(--ease);
+}
+body.ready .inner > *,
+body.ready .lede-col > *,
+body.ready .nav-col li{
+  opacity:1;
+  transform:none;
+}
+
+body.ready .bar        {transition-delay:.34s;}
+body.ready .eyebrow    {transition-delay:.42s;}
+body.ready .headline   {transition-delay:.50s;}
+body.ready .lede       {transition-delay:.60s;}
+body.ready .cta        {transition-delay:.70s;}
+body.ready .nav-col li:nth-child(1){transition-delay:.62s;}
+body.ready .nav-col li:nth-child(2){transition-delay:.70s;}
+body.ready .nav-col li:nth-child(3){transition-delay:.78s;}
+body.ready .nav-col li:nth-child(4){transition-delay:.86s;}
+body.ready .foot       {transition-delay:.94s;}
+
+@media (prefers-reduced-motion:reduce){
+  .panel,
+  .inner > *,
+  .lede-col > *,
+  .nav-col li{opacity:1 !important;transform:none !important;}
+}
