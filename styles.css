@@ -313,7 +313,7 @@ ul{margin:0;padding:0;list-style:none;}
   font-size:clamp(.545rem,.61vw,.645rem);
   letter-spacing:.2em;
   text-transform:uppercase;
-  color:var(--muted);
+  color:var(--muted-lift);
   margin-bottom:clamp(1.35rem,3vh,2.2rem);
 }
 .tick{
@@ -662,7 +662,6 @@ ul{margin:0;padding:0;list-style:none;}
     font-size:clamp(.68rem,3.1vw,.8rem);
     letter-spacing:.13em;
     line-height:1.6;
-    color:var(--ink-soft);
   }
   .headline{font-size:clamp(2.6rem,13vw,4rem);}
   .wordmark{font-size:clamp(1.85rem,6.4vw,2.3rem);letter-spacing:.08em;}
