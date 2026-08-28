@@ -249,18 +249,57 @@
   var coarse = window.matchMedia("(pointer: coarse)").matches;
   var quality = coarse ? 0.62 : 0.84;
   var W = 1, H = 1;
+  var booted = false, settle = 0;
 
-  function resize() {
+  function measure() {
     var r = panel.getBoundingClientRect();
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var w = Math.max(1, Math.round(r.width  * dpr * quality));
-    var h = Math.max(1, Math.round(r.height * dpr * quality));
-    if (w === W && h === H) return;
+    return [Math.max(1, Math.round(r.width  * dpr * quality)),
+            Math.max(1, Math.round(r.height * dpr * quality))];
+  }
+
+  function apply(w, h) {
     W = w; H = h;
     canvas.width = W;
     canvas.height = H;
     gl.viewport(0, 0, W, H);
     gl.uniform2f(U.res, W, H);
+    /* A new backing store comes up empty and stays empty until the next
+       animation frame, which reads as the glass blinking out. The observer
+       runs after layout and before paint, so painting it here means no frame
+       is ever composited from an empty buffer. */
+    if (booted) draw(0);
+  }
+
+  /* the exact size, once it has stopped moving */
+  function trueUp() {
+    settle = 0;
+    var s = measure();
+    if (s[0] !== W || s[1] !== H) apply(s[0], s[1]);
+  }
+
+  function resize() {
+    var s = measure(), w = s[0], h = s[1];
+
+    if (w === W && h === H) {
+      if (settle) { clearTimeout(settle); settle = 0; }
+      return;
+    }
+
+    /* On a phone the panel's height is never still: a note on the rail opens
+       or closes over half a second, the address bar slides away. Reallocating
+       for every intermediate pixel throws the buffer away dozens of times in
+       a row, so a small height-only move rides out on the CSS stretch — which
+       this surface is soft enough to absorb — and is trued up once the size
+       settles. Width still resizes immediately; that one is a real reflow. */
+    if (w === W && Math.abs(h - H) < H * 0.12) {
+      if (settle) clearTimeout(settle);
+      settle = setTimeout(trueUp, 260);
+      return;
+    }
+
+    if (settle) { clearTimeout(settle); settle = 0; }
+    apply(w, h);
   }
 
   if (window.ResizeObserver) {
@@ -285,6 +324,9 @@
   var rip = new Float32Array(9);
   rip[2] = rip[5] = rip[8] = -1;
   var ripSlot = 0, travel = 0, lastRipple = -1;
+
+  /* every uniform draw() reads now exists, so a resize may repaint on the spot */
+  booted = true;
 
   function emit(x, y) {
     var i = ripSlot * 3;
