@@ -492,18 +492,23 @@ ul{margin:0;padding:0;list-style:none;}
   pointer-events:none;
 }
 
+/* the rail sizes to its widest row, so every row shares one geometry:
+   the indices stack in a straight column, the labels stay flush right */
 .nav-col ul{
   position:relative;
   display:grid;
+  width:max-content;
+  max-width:100%;
+  margin-left:auto;
   gap:clamp(.15rem,.9vh,.55rem);
 }
 
 .nav-col a{
   position:relative;
+  width:100%;
   display:grid;
-  grid-template-columns:auto auto;
+  grid-template-columns:auto minmax(0,1fr);
   align-items:baseline;
-  justify-content:end;
   gap:.95rem;
   padding:clamp(.55rem,1.3vh,.85rem) 0 clamp(.55rem,1.3vh,.85rem) 1.5rem;
 }
@@ -535,6 +540,7 @@ ul{margin:0;padding:0;list-style:none;}
   font-size:clamp(.94rem,1.16vw,1.15rem);
   letter-spacing:.008em;
   white-space:nowrap;
+  text-align:right;
   color:var(--ink);
   transition:color .45s var(--ease), transform .55s var(--ease);
   transform-origin:right center;
@@ -626,6 +632,7 @@ ul{margin:0;padding:0;list-style:none;}
   .nav-col{justify-self:stretch;text-align:left;}
   .nav-col::before,
   .nav-col::after{display:none;}
+  .nav-col ul{width:auto;margin-left:0;}
   .nav-col a{
     grid-template-columns:auto 1fr;
     justify-content:start;
@@ -633,7 +640,7 @@ ul{margin:0;padding:0;list-style:none;}
     padding-left:0;
   }
   .nav-col li:last-child a::after{display:block;}
-  .lab{white-space:normal;}
+  .lab{white-space:normal;text-align:left;}
   .note{display:none;}
   .scrim{
     background:
