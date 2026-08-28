@@ -16,8 +16,16 @@
   var FOCUSABLE = 'a[href], button:not([disabled])';
   var lastFocus = null;
 
+  /* on a phone the page scrolls, so the dialog is pinned to the first screen
+     (see styles.css) and the page behind it is held still */
+  var stacked = window.matchMedia("(max-width:860px), (max-aspect-ratio:1/1)");
+
   function open() {
     lastFocus = document.activeElement;
+    if (stacked.matches) {
+      window.scrollTo(0, 0);
+      document.body.classList.add("locked");
+    }
     dialog.hidden = false;
     /* one frame between unhide and the class, or the transition never runs */
     requestAnimationFrame(function () {
@@ -30,6 +38,7 @@
   }
 
   function close() {
+    document.body.classList.remove("locked");
     dialog.classList.remove("open");
     document.removeEventListener("keydown", onKey);
     window.setTimeout(function () {

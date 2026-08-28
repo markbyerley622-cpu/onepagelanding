@@ -15,6 +15,7 @@
   --ink:#f4f6f3;
   --ink-soft:#dfe3dd;
   --muted:#a5aca3;
+  --muted-lift:#c6ccc3;   /* body copy, lifted off grey without going white */
   --faint:#858c82;
   --dim:#4a5048;
 
@@ -361,7 +362,7 @@ ul{margin:0;padding:0;list-style:none;}
   line-height:1.66;
   font-weight:300;
   letter-spacing:.004em;
-  color:var(--muted);
+  color:var(--muted-lift);
   max-width:50ch;
 }
 
@@ -597,7 +598,7 @@ ul{margin:0;padding:0;list-style:none;}
   color:var(--muted);
   text-shadow:0 1px 3px rgba(0,0,0,1), 0 2px 18px rgba(0,0,0,.95);
 }
-.foot .sig{color:var(--muted);}
+.foot .sig{color:var(--muted-lift);}
 
 
 /* --------------------------------------------------------------------------
@@ -611,14 +612,43 @@ ul{margin:0;padding:0;list-style:none;}
 }
 
 @media (max-width:860px), (max-aspect-ratio:1/1){
+  /* the panel still fills the first screen, but it is now a document that
+     scrolls rather than a sealed pane that clips whatever will not fit */
+  html,body{height:auto;min-height:100%;}
+  body{overflow:visible;overflow-x:hidden;}
+
+  .stage{
+    position:relative;
+    display:block;
+    inset:auto;
+    min-height:100vh;
+    min-height:100svh;
+  }
+  .ambient{position:fixed;}
+
   .bezel{
     aspect-ratio:auto;
     width:100%;
-    height:100%;
-    max-height:100%;
+    height:auto;
+    max-height:none;
+    min-height:calc(100vh  - 2 * clamp(.9rem, 3.2vh, 3.25rem));
+    min-height:calc(100svh - 2 * clamp(.9rem, 3.2vh, 3.25rem));
     border-radius:calc(20px + var(--bezel));
   }
-  .panel{border-radius:20px;}
+  /* auto heights alone would leave the panel short of the bezel's min-height,
+     so the chain stretches by flex instead of by percentage */
+  .bezel{display:flex;}
+  .panel{
+    flex:1 1 auto;
+    min-width:0;
+    height:auto;
+    display:flex;
+    flex-direction:column;
+    border-radius:20px;
+  }
+  .inner{flex:1 1 auto;height:auto;}
+  /* a tall panel makes the oversized grain sheet expensive to animate */
+  .grain{inset:-20%;}
   .content{
     grid-template-columns:1fr;
     align-content:center;
@@ -677,8 +707,6 @@ ul{margin:0;padding:0;list-style:none;}
       rgba(0,224,96,.55), rgba(0,224,96,.14) 82%, transparent);
   }
   .nav-col a.is-open .note{max-height:7rem;opacity:1;margin-top:.45rem;}
-  /* a tall phone with a note open must never clip inside the glass */
-  .content{overflow-y:auto;min-height:0;overscroll-behavior:contain;}
   .scrim{
     background:
       linear-gradient(to top, rgba(0,0,0,.92) 6%, rgba(0,0,0,.66) 40%, rgba(0,0,0,.16) 76%, rgba(0,0,0,0) 100%),
@@ -923,15 +951,46 @@ body.ready .foot       {transition-delay:.94s;}
   color:var(--muted);
 }
 
+body.locked{overflow:hidden;}
+
 @media (max-width:860px), (max-aspect-ratio:1/1){
-  .contact{padding:calc(var(--pad-y) + 3.25rem) var(--pad-x) var(--pad-y);}
-  .contact-body{width:100%;}
-  .handles li{flex-wrap:wrap;}
-  .copy{
-    border-left:0;
-    border-top:1px solid var(--hairline);
+  /* .panel is a transformed ancestor, so position:fixed would be trapped by
+     it — the dialog is pinned to the first screen and the page is locked
+     behind it instead */
+  .contact{
+    height:100vh;
+    height:100svh;
+    bottom:auto;
+    padding:calc(var(--pad-y) + 3.25rem) var(--pad-x) var(--pad-y);
+  }
+  /* the dialog fits the screen by giving back padding and card height,
+     not by shrinking the type below reading size */
+  /* at phone size the rail sits directly behind the dialog and read through
+     the 80% veil — on one screen it has to be opaque */
+  .contact-veil{background:rgba(2,4,3,.955);}
+  .contact-body{
     width:100%;
-    padding:.75rem 1.25rem;
-    text-align:left;
+    max-height:100%;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  .contact-title{
+    font-size:clamp(1.95rem,8.6vw,2.7rem);
+    margin-bottom:clamp(1.1rem,3vh,1.8rem);
+  }
+  .contact .eyebrow{margin-bottom:clamp(.9rem,2.4vh,1.5rem);}
+  .handles{gap:.6rem;}
+  .handles a{padding:.85rem .9rem .85rem 1.05rem;}
+  .hd{font-size:1.05rem;}
+  /* the stacked copy button doubled every card's height — keep it inline */
+  .copy{
+    border-left:1px solid var(--hairline);
+    padding:0 .9rem;
+    text-align:center;
+  }
+  .contact-fine{
+    margin-top:clamp(1rem,2.6vh,1.5rem);
+    font-size:.63rem;
+    letter-spacing:.15em;
   }
 }
