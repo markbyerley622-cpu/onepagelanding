@@ -137,7 +137,7 @@ ul{margin:0;padding:0;list-style:none;}
     linear-gradient(100deg, rgba(0,0,0,.90) 0%, rgba(0,0,0,.72) 22%, rgba(0,0,0,.26) 44%, rgba(0,0,0,0) 62%),
     linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0) 34%),
     linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,0) 26%),
-    linear-gradient(to left, rgba(0,0,0,.42), rgba(0,0,0,0) 24%);
+    linear-gradient(to left, rgba(0,0,0,.90) 0%, rgba(0,0,0,.60) 10%, rgba(0,0,0,.20) 20%, rgba(0,0,0,0) 32%);
 }
 
 /* the luminous glass rim */
@@ -226,9 +226,12 @@ ul{margin:0;padding:0;list-style:none;}
 .lede-col{max-width:min(46ch, 100%);}
 
 .eyebrow{
-  display:inline-flex;
+  display:flex;
+  flex-wrap:wrap;
   align-items:center;
-  gap:.7em;
+  gap:.55em .7em;
+  max-width:60ch;
+  line-height:1.75;
   font-family:"JetBrains Mono",ui-monospace,monospace;
   font-size:clamp(.575rem,.66vw,.69rem);
   letter-spacing:.24em;
@@ -243,6 +246,15 @@ ul{margin:0;padding:0;list-style:none;}
   box-shadow:0 0 8px rgba(0,224,96,.9);
   animation:tickglow 4.5s var(--ease) infinite;
 }
+/* the separator between positioning segments */
+.sep{
+  width:3px;height:3px;
+  border-radius:50%;
+  background:var(--dim);
+  display:block;
+  flex:none;
+}
+
 @keyframes tickglow{
   0%,100%{opacity:.55; width:14px;}
   50%    {opacity:1;   width:22px;}
@@ -333,8 +345,22 @@ ul{margin:0;padding:0;list-style:none;}
 .nav-col::before{
   content:"";
   position:absolute;
-  inset:-22% -34% -22% -46%;
-  background:radial-gradient(62% 66% at 76% 50%, rgba(0,0,0,.80), rgba(0,0,0,.34) 52%, transparent 78%);
+  inset:-30% -60% -30% -78%;
+  background:linear-gradient(to left,
+    rgba(0,0,0,.86) 0%,
+    rgba(0,0,0,.62) 34%,
+    rgba(0,0,0,.24) 62%,
+    transparent 100%);
+  pointer-events:none;
+}
+/* a single hairline gives the rail its structure — the only rule on the page */
+.nav-col::after{
+  content:"";
+  position:absolute;
+  top:-4%; bottom:-4%; left:-2.25rem;
+  width:1px;
+  background:linear-gradient(to bottom,
+    transparent, rgba(255,255,255,.10) 22%, rgba(255,255,255,.10) 78%, transparent);
   pointer-events:none;
 }
 
@@ -359,19 +385,21 @@ ul{margin:0;padding:0;list-style:none;}
 
 .idx{
   font-family:"JetBrains Mono",ui-monospace,monospace;
-  font-size:.63rem;
-  letter-spacing:.16em;
-  color:var(--dim);
+  font-weight:500;
+  font-size:clamp(.7rem,.82vw,.79rem);
+  letter-spacing:.14em;
+  color:var(--muted);
+  text-shadow:0 1px 3px rgba(0,0,0,1), 0 2px 16px rgba(0,0,0,.9);
   transition:color .45s var(--ease), text-shadow .45s var(--ease);
 }
 
 .lab{
-  text-shadow:0 1px 16px rgba(0,0,0,.95);
+  text-shadow:0 1px 3px rgba(0,0,0,1), 0 2px 22px rgba(0,0,0,.95);
   font-family:"Inter Tight",sans-serif;
   font-weight:500;
-  font-size:clamp(.95rem,1.18vw,1.16rem);
-  letter-spacing:.015em;
-  color:var(--muted);
+  font-size:clamp(1rem,1.24vw,1.22rem);
+  letter-spacing:.012em;
+  color:var(--ink);
   transition:color .45s var(--ease), transform .55s var(--ease);
   transform-origin:right center;
 }
@@ -387,7 +415,8 @@ ul{margin:0;padding:0;list-style:none;}
   font-weight:300;
   letter-spacing:.01em;
   line-height:1.5;
-  color:var(--faint);
+  color:var(--muted);
+  text-shadow:0 1px 12px rgba(0,0,0,.95);
   transition:max-height .55s var(--ease), opacity .45s var(--ease), margin .55s var(--ease);
 }
 
@@ -460,7 +489,8 @@ ul{margin:0;padding:0;list-style:none;}
   .headline{font-size:clamp(2.6rem,13vw,4rem);}
   .cta{width:100%;min-width:0;}
   .nav-col{justify-self:stretch;text-align:left;}
-  .nav-col::before{display:none;}
+  .nav-col::before,
+  .nav-col::after{display:none;}
   .nav-col a{
     grid-template-columns:auto 1fr;
     justify-content:start;
@@ -538,4 +568,183 @@ body.ready .foot       {transition-delay:.94s;}
   .inner > *,
   .lede-col > *,
   .nav-col li{opacity:1 !important;transform:none !important;}
+}
+
+
+/* --------------------------------------------------------------------------
+   CONTACT — opens inside the glass. The page never leaves the panel.
+   -------------------------------------------------------------------------- */
+
+.contact{
+  position:absolute;
+  inset:0;
+  z-index:6;
+  display:grid;
+  place-items:center;
+  padding:var(--pad-y) var(--pad-x);
+}
+.contact[hidden]{display:none;}
+
+.contact-veil{
+  position:absolute;
+  inset:0;
+  background:rgba(2,4,3,.80);
+  backdrop-filter:blur(22px) saturate(.85);
+  -webkit-backdrop-filter:blur(22px) saturate(.85);
+  opacity:0;
+  transition:opacity .55s var(--ease);
+}
+.contact.open .contact-veil{opacity:1;}
+
+.contact-body{
+  position:relative;
+  z-index:1;
+  width:min(34rem, 100%);
+  max-height:100%;
+  overflow:auto;
+  opacity:0;
+  transform:translate3d(0,12px,0);
+  transition:opacity .5s var(--ease) .08s, transform .7s var(--ease) .08s;
+}
+.contact.open .contact-body{opacity:1;transform:none;}
+
+.contact-close{
+  opacity:0;
+  transition:opacity .5s var(--ease) .08s,
+             border-color .4s var(--ease),
+             background .4s var(--ease);
+}
+.contact.open .contact-close{opacity:1;}
+
+.contact-close{
+  position:absolute;
+  z-index:2;
+  top:var(--pad-y); right:var(--pad-x);
+  width:2.25rem;height:2.25rem;
+  display:grid;place-items:center;
+  background:none;
+  border:1px solid var(--hairline);
+  border-radius:6px;
+  cursor:pointer;
+  transition:border-color .4s var(--ease), background .4s var(--ease);
+}
+.contact-close svg{
+  width:11px;height:11px;
+  fill:none;stroke:var(--muted);stroke-width:1.4;
+  transition:stroke .4s var(--ease);
+}
+.contact-close:hover{border-color:rgba(0,224,96,.42);background:rgba(0,224,96,.05);}
+.contact-close:hover svg{stroke:#fff;}
+.contact-close:focus-visible{outline:1px solid var(--signal);outline-offset:3px;}
+
+.contact-title{
+  margin:0 0 clamp(1.5rem,3.5vh,2.4rem);
+  font-family:"Inter Tight",sans-serif;
+  font-weight:600;
+  font-size:clamp(2.1rem,3.8vw,3.1rem);
+  line-height:1;
+  letter-spacing:-.032em;
+  color:#fff;
+  display:flex;
+  align-items:flex-end;
+  gap:.06em;
+}
+.dot-md{width:.13em;height:.13em;margin-bottom:.12em;}
+
+.handles{display:grid;gap:.75rem;}
+
+.handles li{
+  position:relative;
+  display:flex;
+  align-items:stretch;
+  border:1px solid var(--hairline);
+  border-radius:9px;
+  background:linear-gradient(180deg, rgba(255,255,255,.030), rgba(255,255,255,.008));
+  transition:border-color .45s var(--ease), background .45s var(--ease);
+}
+.handles li:hover{
+  border-color:rgba(0,224,96,.38);
+  background:linear-gradient(180deg, rgba(0,224,96,.075), rgba(0,224,96,.02));
+}
+
+.handles a{
+  flex:1;
+  min-width:0;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:.9rem;
+  padding:1rem 1.1rem 1rem 1.25rem;
+}
+.handles a:focus-visible{outline:1px solid var(--signal);outline-offset:-1px;border-radius:9px;}
+
+.ch{
+  grid-column:1;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:.6rem;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--faint);
+  display:block;
+  margin-bottom:.3rem;
+}
+.hd{
+  grid-column:1;
+  font-family:"Inter Tight",sans-serif;
+  font-weight:500;
+  font-size:clamp(1rem,1.5vw,1.2rem);
+  letter-spacing:-.005em;
+  color:#fff;
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.go{
+  grid-column:2;grid-row:1 / span 2;
+  width:22px;height:11px;
+  fill:none;stroke:var(--signal);stroke-width:1.35;stroke-linecap:square;
+  transition:transform .55s var(--ease);
+  filter:drop-shadow(0 0 6px rgba(0,224,96,.5));
+}
+.handles li:hover .go{transform:translateX(4px);}
+
+.copy{
+  flex:none;
+  padding:0 1.05rem;
+  border:0;
+  border-left:1px solid var(--hairline);
+  background:none;
+  cursor:pointer;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:.6rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+  transition:color .4s var(--ease), background .4s var(--ease);
+}
+.copy:hover{color:#fff;background:rgba(255,255,255,.04);}
+.copy:focus-visible{outline:1px solid var(--signal);outline-offset:-2px;}
+.copy.done{color:var(--signal);text-shadow:0 0 12px rgba(0,224,96,.7);}
+
+.contact-fine{
+  margin:clamp(1.4rem,3vh,2rem) 0 0;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:clamp(.575rem,.66vw,.69rem);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--faint);
+}
+
+@media (max-width:860px), (max-aspect-ratio:1/1){
+  .contact{padding:calc(var(--pad-y) + 3.25rem) var(--pad-x) var(--pad-y);}
+  .contact-body{width:100%;}
+  .handles li{flex-wrap:wrap;}
+  .copy{
+    border-left:0;
+    border-top:1px solid var(--hairline);
+    width:100%;
+    padding:.75rem 1.25rem;
+    text-align:left;
+  }
 }

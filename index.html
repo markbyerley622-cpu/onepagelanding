@@ -4,10 +4,10 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>DRK. — Get Liquid.</title>
-<meta name="description" content="DRK brings institutional-grade liquidity management built for performance, execution, and scale." />
+<meta name="description" content="We combine technical and trading infrastructure with hands-on execution to help build and scale high-conviction blockchain projects." />
 <meta name="theme-color" content="#000000" />
 <meta property="og:title" content="DRK. — Get Liquid." />
-<meta property="og:description" content="Institutional-grade liquidity management built for performance, execution, and scale." />
+<meta property="og:description" content="Programmatic trading, liquidity infrastructure and market operations for high-conviction blockchain projects." />
 <meta property="og:type" content="website" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -31,19 +31,25 @@
 
       <header class="bar">
         <div class="wordmark">DRK<i class="dot"></i></div>
-        <div class="meta">Launch &amp; Institutional Trading</div>
       </header>
 
       <div class="content">
 
         <section class="lede-col">
-          <div class="eyebrow"><i class="tick"></i>Liquidity Infrastructure</div>
+          <div class="eyebrow">
+            <i class="tick"></i>
+            <span>Programmatic Trading</span>
+            <i class="sep"></i>
+            <span>Liquidity Infrastructure</span>
+            <i class="sep"></i>
+            <span>Market Operations</span>
+          </div>
           <h1 class="headline">Get&nbsp;Liquid<i class="dot dot-lg"></i></h1>
-          <p class="lede">DRK brings institutional-grade liquidity management built for performance, execution, and scale.</p>
-          <a class="cta" href="mailto:hello@drk.trade">
+          <p class="lede">We combine technical and trading infrastructure with hands-on execution to help build and scale high-conviction blockchain projects.</p>
+          <button class="cta" type="button" id="contact-open" aria-haspopup="dialog" aria-controls="contact">
             <span>Get in touch</span>
             <svg viewBox="0 0 24 12" aria-hidden="true"><path d="M0 6h21.5M17 1.2 22.2 6 17 10.8"/></svg>
-          </a>
+          </button>
         </section>
 
         <nav class="nav-col" aria-label="Categories">
@@ -63,9 +69,42 @@
       </footer>
 
     </div>
+
+    <div class="contact" id="contact" role="dialog" aria-modal="true" aria-labelledby="contact-title" hidden>
+      <div class="contact-veil" data-close></div>
+      <button class="contact-close" type="button" id="contact-close" aria-label="Close">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 1l14 14M15 1L1 15"/></svg>
+      </button>
+      <div class="contact-body">
+        <div class="eyebrow"><i class="tick"></i>Direct line to the team</div>
+        <h2 class="contact-title" id="contact-title">Talk to us<i class="dot dot-md"></i></h2>
+
+        <ul class="handles">
+          <li>
+            <a href="https://t.me/unicorrrrnnnnn" target="_blank" rel="noopener noreferrer">
+              <span class="ch">Telegram</span>
+              <span class="hd">@unicorrrrnnnnn</span>
+              <svg class="go" viewBox="0 0 24 12" aria-hidden="true"><path d="M0 6h21.5M17 1.2 22.2 6 17 10.8"/></svg>
+            </a>
+            <button class="copy" type="button" data-copy="@unicorrrrnnnnn">Copy</button>
+          </li>
+          <li>
+            <a href="https://t.me/GokuSan0x" target="_blank" rel="noopener noreferrer">
+              <span class="ch">Telegram</span>
+              <span class="hd">@GokuSan0x</span>
+              <svg class="go" viewBox="0 0 24 12" aria-hidden="true"><path d="M0 6h21.5M17 1.2 22.2 6 17 10.8"/></svg>
+            </a>
+            <button class="copy" type="button" data-copy="@GokuSan0x">Copy</button>
+          </li>
+        </ul>
+
+        <p class="contact-fine">Messages reach the team directly. No forms, no queue.</p>
+      </div>
+    </div>
   </main>
 </div>
 
 <script src="liquid.js" defer></script>
+<script src="contact.js" defer></script>
 </body>
 </html>

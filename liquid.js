@@ -166,7 +166,7 @@
     "  float portrait = 1.0 - smoothstep(0.95, 1.45, aspect);",
     "  float guard = mix(smoothstep(0.10, 0.62, uv.x), 1.0, portrait);",
     "  col *= mix(0.07, 1.0, guard);",
-    "  col *= 1.0 - 0.30 * (1.0 - portrait) * smoothstep(0.86, 1.02, uv.x);",
+    "  col *= 1.0 - 0.55 * (1.0 - portrait) * smoothstep(0.80, 1.02, uv.x);",
     "  col *= 1.0 - 0.32 * smoothstep(0.76, 1.04, uv.y);",
     "  col *= 1.0 - 0.28 * smoothstep(0.24, -0.04, uv.y);",
 

@@ -10,6 +10,7 @@ No build step, no dependencies. Open `index.html`, or serve the folder.
 index.html    composition and copy
 styles.css    DRK design tokens, layout, glass, motion
 liquid.js     the liquid-glass shader (one draw call)
+contact.js    the contact dialog
 ```
 
 ## The surface
@@ -49,3 +50,19 @@ Mobile keeps the single-panel concept. The panel goes full-bleed, the category
 rail becomes a list inside the same glass, and the shader relaxes its left-hand
 masking so the sheet still reads across a narrow viewport. It never becomes a
 conventional stacked website.
+
+## Contact
+
+"Get in touch" opens a dialog **inside the glass** — the page never leaves the
+panel. The Telegram handles are the primary action, transcribed verbatim from
+the deck's `content/drk.ts`, which warns that a wrong handle sends an investor
+to a stranger. They are never generated.
+
+Each handle opens in a new tab (`rel="noopener noreferrer"`) and can be copied
+to the clipboard, with a selection fallback for `file://` and older Safari.
+Escape closes it, focus is trapped while open and returns to the trigger on
+close.
+
+> **Note for future edits:** `.contact-body` must keep `position:relative` and
+> `z-index:1`. Without its own stacking context it is absorbed into the veil's
+> `backdrop-filter` and its text is blurred out of existence in Chromium.
