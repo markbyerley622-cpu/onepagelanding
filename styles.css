@@ -20,7 +20,8 @@
   --signal:#00e060;
   --signal-bright:#00fc6b;
 
-  --r-surface:22px;
+  --r-surface:20px;
+  --bezel:clamp(7px, .72vw, 12px);
 
   --ease:cubic-bezier(.16,1,.3,1);
 
@@ -84,23 +85,67 @@ ul{margin:0;padding:0;list-style:none;}
    PANEL — the floating sheet of smoked glass
    -------------------------------------------------------------------------- */
 
-.panel{
+/* --- the bezel: a machined ring of glass around the screen ---------------- */
+
+.bezel{
   position:relative;
   width:min(1500px, 100%);
-  height:min(100%, 780px);
-  aspect-ratio:1500/700;
+  max-width:100%;
+  aspect-ratio:1500/712;
   max-height:100%;
+  min-width:0;
+  padding:var(--bezel);
+  border-radius:calc(var(--r-surface) + var(--bezel));
+  /* the material: dark, with the light catching the top and bottom curves */
+  background:
+    linear-gradient(158deg,
+      #1b201c 0%, #0c100d 14%, #050705 42%,
+      #040604 58%, #0b0f0c 84%, #1e241f 100%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.085),
+    0 44px 120px -34px rgba(0,0,0,1),
+    0 0 170px -58px rgba(0,224,96,.26),
+    inset 0 1px 0 rgba(255,255,255,.26),
+    inset 0 -1px 0 rgba(255,255,255,.11);
+  transform:translate3d(0,0,0);
+}
+
+/* the specular that runs around the ring — this is what reads as glass */
+.bezel::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  padding:var(--bezel);
+  background:linear-gradient(122deg,
+    rgba(255,255,255,.60) 0%,
+    rgba(255,255,255,.06) 13%,
+    transparent 30%,
+    rgba(0,224,96,.24) 50%,
+    transparent 68%,
+    rgba(255,255,255,.10) 86%,
+    rgba(255,255,255,.46) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask-composite:exclude;
+  opacity:.55;
+  pointer-events:none;
+}
+
+.panel{
+  position:relative;
+  width:100%;
+  height:100%;
   border-radius:var(--r-surface);
   overflow:hidden;
   isolation:isolate;
   background:var(--base);
-  /* the bezel: an outer dark rim, a hair of light on top, deep drop below */
+  /* the inner lip, where the screen sits below the glass */
   box-shadow:
-    0 0 0 1px rgba(255,255,255,.055),
-    0 0 0 8px rgba(255,255,255,.018),
-    0 0 0 9px rgba(0,0,0,.9),
-    0 46px 120px -32px rgba(0,0,0,1),
-    0 0 140px -50px rgba(0,224,96,.24);
+    0 0 0 1px rgba(255,255,255,.10),
+    inset 0 1px 2px rgba(0,0,0,.9),
+    inset 0 0 22px rgba(0,0,0,.65);
   transform:translate3d(0,0,0);
 }
 
@@ -237,7 +282,7 @@ ul{margin:0;padding:0;list-style:none;}
   padding:clamp(1rem,3.5vh,3rem) 0;
 }
 
-.lede-col{max-width:min(54ch, 100%);}
+.lede-col{max-width:100%;}
 
 .eyebrow{
   display:flex;
@@ -276,6 +321,7 @@ ul{margin:0;padding:0;list-style:none;}
 
 .headline{
   margin:0;
+  max-width:16ch;
   font-family:"Inter Tight",sans-serif;
   font-weight:600;
   font-size:clamp(2.9rem, 5.6vw, 5.6rem);
@@ -477,13 +523,7 @@ ul{margin:0;padding:0;list-style:none;}
   text-shadow:0 1px 3px rgba(0,0,0,1), 0 2px 18px rgba(0,0,0,.95);
 }
 .foot .sig{color:var(--muted);}
-.rt{display:inline-flex;align-items:center;gap:.65em;}
-.live{
-  width:5px;height:5px;border-radius:50%;
-  background:var(--signal);
-  box-shadow:0 0 9px rgba(0,224,96,.9);
-  animation:pulse 3.2s var(--ease) infinite;
-}
+
 
 /* --------------------------------------------------------------------------
    RESPONSIVE — the single-panel concept is preserved, never a stacked site
@@ -491,17 +531,19 @@ ul{margin:0;padding:0;list-style:none;}
 
 @media (max-width:1080px){
   .content{gap:clamp(1.5rem,4vw,3rem);}
-  .lede{max-width:42ch;}
+  .lede{max-width:38ch;}
+  .eyebrow{font-size:.55rem;letter-spacing:.17em;}
 }
 
 @media (max-width:860px), (max-aspect-ratio:1/1){
-  .panel{
+  .bezel{
     aspect-ratio:auto;
     width:100%;
     height:100%;
-    max-height:none;
-    border-radius:20px;
+    max-height:100%;
+    border-radius:calc(20px + var(--bezel));
   }
+  .panel{border-radius:20px;}
   .content{
     grid-template-columns:1fr;
     align-content:center;
@@ -553,12 +595,12 @@ ul{margin:0;padding:0;list-style:none;}
    ENTRANCE — the glass settles into the room once, then never again
    -------------------------------------------------------------------------- */
 
-.panel{
+.bezel{
   opacity:0;
   transform:translate3d(0,10px,0) scale(.988);
   transition:opacity 1.15s var(--ease), transform 1.5s var(--ease);
 }
-body.ready .panel{
+body.ready .bezel{
   opacity:1;
   transform:translate3d(0,0,0) scale(1);
 }
@@ -589,7 +631,7 @@ body.ready .nav-col li:nth-child(4){transition-delay:.86s;}
 body.ready .foot       {transition-delay:.94s;}
 
 @media (prefers-reduced-motion:reduce){
-  .panel,
+  .bezel,
   .inner > *,
   .lede-col > *,
   .nav-col li{opacity:1 !important;transform:none !important;}

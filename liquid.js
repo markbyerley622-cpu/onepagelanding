@@ -83,6 +83,7 @@
 
     /* Three soft octaves. Deliberately few: this surface is a swell, not a
        texture — the moment a fourth octave goes in it reads as noise. */
+    /* Three soft octaves. Deliberately few: this is a swell, not a texture. */
     "float fbm(vec2 p){",
     "  float f  = 0.55 * snoise(p);",
     "  p = p * 2.03 + 9.1;   f += 0.28 * snoise(p);",
@@ -90,11 +91,9 @@
     "  return f;",
     "}",
 
-    /* the surface: a broad swell plus one faint filament layer, for the
-       hair-fine light strands that run along the crests */
-    "float surface(vec2 sp, vec2 w, float t){",
-    "  vec2 z = sp + 0.80 * w;",
-    "  return fbm(z) + snoise(z * 1.45 + vec2(0.0, t * 0.7)) * 0.030;",
+    /* one faint filament layer for the hair-fine strands along the crests */
+    "float surface(vec2 z, float t){",
+    "  return fbm(z) + snoise(z * 2.3 + vec2(0.0, t * 0.45)) * 0.042;",
     "}",
 
     "void main(){",
@@ -102,73 +101,88 @@
     "  float aspect = uRes.x / max(uRes.y, 1.0);",
     "  vec2 p = vec2((uv.x - 0.5) * aspect, uv.y - 0.5);",
 
-    "  p += uPar * 0.028;",
+    "  p += uPar * 0.022;",
 
     "  float md = length(p - uMouse);",
-    "  p += (p - uMouse) * exp(-md * md * 5.0) * 0.115 * uHover;",
+    "  p += (p - uMouse) * exp(-md * md * 5.0) * 0.100 * uHover;",
 
     "  for(int i = 0; i < 3; i++){",
     "    vec3 R = uRip[i];",
     "    if(R.z >= 0.0){",
     "      float d = length(p - R.xy);",
-    "      float wv = sin(d * 17.0 - R.z * 6.2)",
+    "      float wv = sin(d * 16.0 - R.z * 5.6)",
     "               * exp(-d * 2.6) * exp(-R.z * 1.7);",
-    "      p += (p - R.xy) / max(d, 1e-4) * wv * 0.026;",
+    "      p += (p - R.xy) / max(d, 1e-4) * wv * 0.022;",
     "    }",
     "  }",
 
-    "  vec2 sp = vec2(p.x * 0.255, p.y * 1.30);",
-    "  float t = uTime * 0.038;",
+    /* ---- ROTATE INTO THE RIBBON FRAME.
+       Everything below works along a 19-degree axis, so the sheets run up and
+       to the right instead of lying flat across the panel. ---- */
+    "  const float CA = 0.9205;",   /* cos 23deg */
+    "  const float SA = 0.3907;",   /* sin 23deg */
+    "  vec2 f = vec2(p.x * CA + p.y * SA, -p.x * SA + p.y * CA);",
 
-    "  vec2 q = vec2(fbm(sp + vec2(0.0, t)),",
-    "                fbm(sp + vec2(4.4, 1.9) - t * 0.55));",
-    "  vec2 w = vec2(fbm(sp + 0.85 * q + vec2(1.7, 9.2) + t * 0.36),",
-    "                fbm(sp + 0.85 * q + vec2(8.3, 2.8) - t * 0.28));",
+    "  float t = uTime * 0.020;",
 
-    "  float e  = 0.014;",
-    "  float h  = surface(sp,                w, uTime);",
-    "  float hx = surface(sp + vec2(e, 0.0), w, uTime);",
-    "  float hy = surface(sp + vec2(0.0, e), w, uTime);",
-    "  vec3  n  = normalize(vec3((h - hx) / e, (h - hy) / e, 1.55));",
+    /* 8:1 anisotropy makes ribbons rather than blobs; the warp is small so they
+       stay coherent, and the drift runs ALONG the flow so the sheet rises. */
+    "  vec2 sp = vec2(f.x * 0.36, f.y * 1.62);",
+    "  vec2 q  = vec2(fbm(sp * 0.62 + vec2(t * 0.55, 0.0)),",
+    "                 fbm(sp * 0.62 + vec2(3.1, 1.7) - t * 0.42));",
+    "  vec2 base = sp + 0.62 * q + vec2(-t * 1.15, t * 0.10);",
+
+    "  float e  = 0.012;",
+    "  float h  = surface(base,                  uTime);",
+    "  float hx = surface(base + vec2(e, 0.0),   uTime);",
+    "  float hy = surface(base + vec2(0.0, e),   uTime);",
+    "  vec3  n  = normalize(vec3((h - hx) / e, (h - hy) / e, 1.35));",
+    /* the light lives in screen space, so bring the normal back out of the
+       ribbon frame before shading */
+    "  n.xy = vec2(n.x * CA - n.y * SA, n.x * SA + n.y * CA);",
 
     "  float ridge = clamp(1.0 - abs(h), 0.0, 1.0);",
 
-    "  float band = uv.y - (0.18 + uv.x * 0.52);",
-    "  float gm = exp(-band * band * 19.0);",
-    "  gm *= smoothstep(0.34, 0.86, uv.x);",
-    "  gm *= 0.45 + 0.55 * smoothstep(0.25, 0.92, ridge);",
-    "  gm *= 0.80 + 0.20 * sin(uTime * 0.19 + h * 2.2);",
-    "  gm += 0.34 * exp(-(pow((uv.x - 0.88) * 3.1, 2.0) + pow((uv.y - 0.88) * 3.4, 2.0)));",
-    "  gm += exp(-pow((uv.y - uAccentY) * 3.0, 2.0)) * uAccentA * 0.45 * smoothstep(0.34, 1.0, uv.x);",
+    /* ---- the green rides ONE ribbon edge, bending with the flow ---- */
+    "  float bandY = f.y - 0.098 + 0.13 * q.y;",
+    "  float gm = exp(-bandY * bandY * 42.0);",
+    "  gm *= smoothstep(0.22, 0.74, uv.x);",
+    "  gm *= 0.42 + 0.58 * smoothstep(0.25, 0.95, ridge);",
+    "  gm *= 0.86 + 0.14 * sin(uTime * 0.13 + h * 1.8);",
+    "  gm += 0.46 * exp(-(pow((uv.x - 0.88) * 2.3, 2.0) + pow((uv.y - 0.90) * 2.5, 2.0)));",
+    "  gm += exp(-pow((uv.y - uAccentY) * 3.0, 2.0)) * uAccentA * 0.40 * smoothstep(0.34, 1.0, uv.x);",
 
+    /* ---- lighting ---- */
     "  vec3 V = vec3(0.0, 0.0, 1.0);",
-    "  vec3 H1 = normalize(normalize(vec3(0.58, 0.42, 0.70)) + V);",
+    "  vec3 H1 = normalize(normalize(vec3(0.52, 0.50, 0.70)) + V);",
     "  float nh1   = max(dot(n, H1), 0.0);",
-    "  float glint = pow(nh1, 55.0);",
-    "  float sheen = pow(nh1, 10.0);",
+    "  float glint = pow(nh1, 60.0);",
+    "  float sheen = pow(nh1, 11.0);",
 
-    "  vec3 H2 = normalize(normalize(vec3(-0.40, 0.58, 0.56)) + V);",
-    "  float gspec = pow(max(dot(n, H2), 0.0), 20.0);",
+    "  vec3 H2 = normalize(normalize(vec3(-0.34, 0.62, 0.56)) + V);",
+    "  float gspec = pow(max(dot(n, H2), 0.0), 22.0);",
 
     "  float fres = pow(1.0 - max(dot(n, V), 0.0), 3.0);",
 
+    /* ---- assembly: black chrome first, green only on the one sweep ---- */
     "  const vec3 SIG = vec3(0.0, 0.878, 0.376);",
     "  vec3 col = vec3(0.005, 0.007, 0.006);",
 
-    "  col += vec3(0.013, 0.021, 0.020) * (0.28 + 0.72 * ridge) * 0.70;",
-    "  col += vec3(0.080, 0.092, 0.087) * sheen * 0.82;",
-    "  col += vec3(1.0, 1.0, 0.99) * glint * 0.78;",
-    "  col += SIG * gspec * gm * 1.55;",
+    "  col += vec3(0.012, 0.020, 0.019) * (0.28 + 0.72 * ridge) * 0.68;",
+    "  col += vec3(0.082, 0.094, 0.089) * sheen * 0.86;",
+    "  col += vec3(1.0, 1.0, 0.99) * glint * 0.80;",
+    "  col += SIG * gspec * gm * 1.90;",
     "  col += SIG * pow(ridge, 7.0) * gm * 0.26;",
-    "  col += vec3(0.35, 1.0, 0.62) * pow(ridge, 34.0) * gm * 1.30;",
-    "  col += (vec3(0.075, 0.10, 0.096) + SIG * 0.26 * gm) * fres * 0.80;",
+    "  col += vec3(0.45, 1.0, 0.68) * pow(ridge, 22.0) * gm * 1.75;",
+    "  col += (vec3(0.072, 0.098, 0.094) + SIG * 0.26 * gm) * fres * 0.78;",
 
+    /* ---- black under the type, calm at the rail and the footer ---- */
     "  float portrait = 1.0 - smoothstep(0.95, 1.45, aspect);",
-    "  float guard = mix(smoothstep(0.10, 0.62, uv.x), 1.0, portrait);",
+    "  float guard = mix(smoothstep(0.08, 0.58, uv.x), 1.0, portrait);",
     "  col *= mix(0.07, 1.0, guard);",
     "  col *= 1.0 - 0.66 * (1.0 - portrait) * smoothstep(0.76, 1.02, uv.x);",
-    "  col *= 1.0 - 0.32 * smoothstep(0.76, 1.04, uv.y);",
-    "  col *= 1.0 - 0.42 * smoothstep(0.26, -0.04, uv.y);",
+    "  col *= 1.0 - 0.34 * smoothstep(0.78, 1.04, uv.y);",
+    "  col *= 1.0 - 0.46 * smoothstep(0.28, -0.04, uv.y);",
 
     "  col = col / (1.0 + col * 0.40);",
     "  col = pow(max(col, 0.0), vec3(0.92));",
