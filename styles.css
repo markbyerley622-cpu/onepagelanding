@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* ==========================================================================
    DRK — one-page liquid glass
    Tokens carried over from the DRK design system (interactive-deck/globals.css)
@@ -627,6 +628,12 @@ ul{margin:0;padding:0;list-style:none;}
   }
   .lede-col{max-width:100%;}
   .lede{max-width:100%;}
+  .eyebrow{
+    font-size:clamp(.68rem,3.1vw,.8rem);
+    letter-spacing:.13em;
+    line-height:1.6;
+    color:var(--ink-soft);
+  }
   .headline{font-size:clamp(2.6rem,13vw,4rem);}
   .wordmark{font-size:clamp(1.85rem,6.4vw,2.3rem);letter-spacing:.08em;}
   .cta{width:100%;min-width:0;}
@@ -643,19 +650,26 @@ ul{margin:0;padding:0;list-style:none;}
   .nav-col li:last-child a::after{display:block;}
   .lab{white-space:normal;text-align:left;padding-right:1.75rem;}
   .note{padding-right:1.75rem;}
-  /* the rail is tapped, not hovered — so it says so */
+  /* the rail is tapped, not hovered - so it says so. The mark is drawn from
+     two bars rather than set as a glyph: the vertical one collapses on open,
+     turning the plus into a minus with nothing to mis-encode. */
   .nav-col a::before{
-    content:"+";
+    content:"";
     position:absolute;
     right:0;
     top:clamp(.55rem,1.3vh,.85rem);
-    font-family:"JetBrains Mono",ui-monospace,monospace;
-    font-size:1rem;
-    line-height:1.3;
-    color:var(--dim);
-    transition:color .4s var(--ease);
+    width:12px;
+    height:1.3em;
+    background:
+      linear-gradient(var(--faint),var(--faint)) center/12px 1px no-repeat,
+      linear-gradient(var(--faint),var(--faint)) center/1px 12px no-repeat;
+    transition:background-size .45s var(--ease), background-image .45s var(--ease);
   }
-  .nav-col a.is-open::before{content:"3";color:var(--signal);}
+  .nav-col a.is-open::before{
+    background:
+      linear-gradient(var(--signal),var(--signal)) center/12px 1px no-repeat,
+      linear-gradient(var(--signal),var(--signal)) center/1px 0 no-repeat;
+  }
   .nav-col a.is-open .lab{color:#fff;}
   .nav-col a.is-open .idx{color:var(--signal);text-shadow:0 0 12px rgba(0,224,96,.7);}
   .nav-col a.is-open::after{
