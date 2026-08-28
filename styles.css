@@ -256,8 +256,8 @@ ul{margin:0;padding:0;list-style:none;}
 .wordmark{
   font-family:"Inter Tight",sans-serif;
   font-weight:700;
-  font-size:clamp(1.35rem, 1.85vw, 1.9rem);
-  letter-spacing:.09em;
+  font-size:clamp(1.65rem, 2.35vw, 2.45rem);
+  letter-spacing:.085em;
   line-height:1;
   color:#fff;
   display:inline-flex;
@@ -628,7 +628,7 @@ ul{margin:0;padding:0;list-style:none;}
   .lede-col{max-width:100%;}
   .lede{max-width:100%;}
   .headline{font-size:clamp(2.6rem,13vw,4rem);}
-  .wordmark{font-size:clamp(1.6rem,5.4vw,1.95rem);letter-spacing:.085em;}
+  .wordmark{font-size:clamp(1.85rem,6.4vw,2.3rem);letter-spacing:.08em;}
   .cta{width:100%;min-width:0;}
   .nav-col{justify-self:stretch;text-align:left;}
   .nav-col::before,
